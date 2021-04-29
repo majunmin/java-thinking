@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <!-- 日志文件目录和压缩文件目录配置 -->
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout
+                    pattern="%highlight{%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %M() @%L - %msg%n}{FATAL=Bright Red, ERROR=Bright Magenta, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White}"/>
+        </Console>
+
+        <!--这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingInfoFile" fileName="log/app.log"
+                     filePattern="logs/info/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <JsonLayout compact="true" locationInfo="true" complete="false" eventEol="true"/>
+            <SizeBasedTriggeringPolicy size="20MB"/>
+        </RollingFile>
+
+        <!-- error 日志 -->
+        <RollingFile name="RollingErrorFile" fileName="log/error.log"
+                     filePattern="logs/error/$${date:yyyy-MM}/error-%d{MM-dd-yyyy}-%i.log.gz">
+            <JsonLayout compact="true" locationInfo="true" complete="false" eventEol="true"/>
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <SizeBasedTriggeringPolicy size="20MB"/>
+        </RollingFile>
+    </Appenders>
+
+    <!-- 全局配置，默认所有的Logger都继承此配置 -->
+    <Loggers>
+        <Root level="INFO">
+            <!--            <AppenderRef ref="RollingInfoFile"/>-->
+            <!--            <AppenderRef ref="RollingErrorFile"/>-->
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

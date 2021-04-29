@@ -130,16 +130,17 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             final Thread current = Thread.currentThread();
             int c = getState();
             if (c == 0) {
+                // c == 0表示 锁被释放了,这时非公平锁不管队列里面是否有线程排队,这里直接去尝试获取锁
                 if (compareAndSetState(0, acquires)) {
                     setExclusiveOwnerThread(current);
                     return true;
                 }
             }
-            else if (current == getExclusiveOwnerThread()) {
+            else if (current == getExclusiveOwnerThread()) { // 这就是可重入的实现
                 int nextc = c + acquires;
                 if (nextc < 0) // overflow
                     throw new Error("Maximum lock count exceeded");
-                setState(nextc);
+                setState(nextc); // 当前线程持有 排它锁 , 所以这里不用 cas设置 state
                 return true;
             }
             return false;
@@ -147,9 +148,11 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
         protected final boolean tryRelease(int releases) {
             int c = getState() - releases;
+            // 判断当前线程和 持有锁线程是否是同一个线程
             if (Thread.currentThread() != getExclusiveOwnerThread())
                 throw new IllegalMonitorStateException();
             boolean free = false;
+            // 这里就是可重入锁的一个判断,当 state == 0 ,表示没有嵌套锁了,可以释放
             if (c == 0) {
                 free = true;
                 setExclusiveOwnerThread(null);
@@ -199,6 +202,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         private static final long serialVersionUID = 7316153563782823691L;
 
         /**
+         *  非公平锁 比 公平锁吞吐率高
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
          */

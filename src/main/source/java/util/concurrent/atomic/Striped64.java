@@ -44,7 +44,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * extends Number so that concrete subclasses must publicly do so.
  */
 @SuppressWarnings("serial")
-abstract class Striped64 extends Number {
+abstract class  Striped64 extends Number {
     /*
      * This class maintains a lazily-initialized table of atomically
      * updated variables, plus an extra "base" field. The table size

@@ -373,6 +373,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     /**
+     * 返回大于 cap的 最小的 2的幂次方
      * Returns a power of two size for the given target capacity.
      */
     static final int tableSizeFor(int cap) {
@@ -388,6 +389,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     /* ---------------- Fields -------------- */
 
     /**
+     * hash表
      * The table, initialized on first use, and resized as
      * necessary. When allocated, length is always a power of two.
      * (We also tolerate length zero in some operations to allow
@@ -416,6 +418,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     transient int modCount;
 
     /**
+     * table 长度 达到 threshold 进行扩容
      * The next size value at which to resize (capacity * load factor).
      *
      * @serial
@@ -666,6 +669,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     /**
+     * 初始化 or 扩容 table
      * Initializes or doubles table size.  If null, allocates in
      * accord with initial capacity target held in field threshold.
      * Otherwise, because we are using power-of-two expansion, the
@@ -680,7 +684,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         int oldThr = threshold;
         int newCap, newThr = 0;
         if (oldCap > 0) {
-            if (oldCap >= MAXIMUM_CAPACITY) {
+            if (oldCap >= MAXIMUM_CAPACITY) {// 如果旧数组容量 >=  MAXIMUM_CAPACITY, 就将 threshold 设置为 Integer.MAX_VALUE,后序不再扩容
                 threshold = Integer.MAX_VALUE;
                 return oldTab;
             }
@@ -703,10 +707,11 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         @SuppressWarnings({"rawtypes","unchecked"})
             Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
         table = newTab;
+        // 将旧数组的数据(oldTab) 逐个迁移到 新数组(newTab)
         if (oldTab != null) {
             for (int j = 0; j < oldCap; ++j) {
                 Node<K,V> e;
-                if ((e = oldTab[j]) != null) {
+                if ((e = oldTab[j]) != null) {// e 为数组头结点
                     oldTab[j] = null;
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;

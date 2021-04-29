@@ -311,6 +311,7 @@ public class ReentrantReadWriteLock
          * <p>Accessed via a benign data race; relies on the memory
          * model's final field and out-of-thin-air guarantees.
          */
+        // 上一次获取 共享锁 线程计数
         private transient HoldCounter cachedHoldCounter;
 
         /**
@@ -396,9 +397,10 @@ public class ReentrantReadWriteLock
                 // (Note: if c != 0 and w == 0 then shared count != 0)
                 if (w == 0 || current != getExclusiveOwnerThread())
                     return false;
+                // 走到这里  w != 0 || 当前线程持有锁
                 if (w + exclusiveCount(acquires) > MAX_COUNT)
                     throw new Error("Maximum lock count exceeded");
-                // Reentrant acquire
+                // Reentrant acquire => 这里不用 CAS设置state 是因为 writeLock是互斥的
                 setState(c + acquires);
                 return true;
             }
@@ -422,6 +424,7 @@ public class ReentrantReadWriteLock
                 if (rh == null || rh.tid != getThreadId(current))
                     rh = readHolds.get();
                 int count = rh.count;
+                // 当 count <= 1 时 进行 ThreadLocal.remove() 不然容易出现内存泄漏
                 if (count <= 1) {
                     readHolds.remove();
                     if (count <= 0)
@@ -429,14 +432,14 @@ public class ReentrantReadWriteLock
                 }
                 --rh.count;
             }
-            for (;;) {
+            for (;;) { // loop cas 释放锁, 因为有其他线程也在释放锁
                 int c = getState();
                 int nextc = c - SHARED_UNIT;
                 if (compareAndSetState(c, nextc))
                     // Releasing the read lock has no effect on readers,
                     // but it may allow waiting writers to proceed if
                     // both read and write locks are now free.
-                    return nextc == 0;
+                    return nextc == 0; // 如果当前锁释放了,  就唤醒后继节点
             }
         }
 
