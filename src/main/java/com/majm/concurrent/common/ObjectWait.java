@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
  * https://www.cnblogs.com/hy928302776/p/3255641.html
  * <p>
  * Object.wait 将当前线程加入到 waitset, 并释放cpu执行权限
+ * 同步队列
+ * 阻塞队列
  *
  * @author majunmin
  * @description
